@@ -1,0 +1,3 @@
+apiVersion: v2
+name: application-resources
+description: A Helm chart for Kubernetes
