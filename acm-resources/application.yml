@@ -2,59 +2,42 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: mariadb
+  name: gitops-apps
 ---
 apiVersion: apps.open-cluster-management.io/v1
 kind: Channel
 metadata:
-  name: mariadb-app
-  namespace: mariadb
+  name: gitops-apps
+  namespace: gitops-apps
 spec:
   type: Git
-  pathname: https://gitlab.com/michael.kot/rhacm-demo.git
+  pathname: https://github.com/fazifs/argocd-rhacm.git
 ---
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
-  name: dev-clusters
-  namespace: mariadb
+  name: aws-clusters
+  namespace: gitops-apps
 spec:
   clusterConditions:
     - type: ManagedClusterConditionAvailable
       status: "True"
   clusterSelector:
     matchLabels:
-      environment: dev
+       cluster.open-cluster-management.io/placement: aws-clusters
 ---
 apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
-  name: mariadb-app
-  namespace: mariadb
+  name: gitops-apps
+  namespace: gitops-apps
   labels:
-    app: mariadb-app
+    app: gitops-apps
   annotations:
     apps.open-cluster-management.io/github-path: mariadb-resources
 spec:
-  channel: mariadb/mariadb-app
+  channel: gitops-apps/gitops-apps
   placement:
     placementRef:
       kind: PlacementRule
-      name: dev-clusters
----
-apiVersion: app.k8s.io/v1beta1
-kind: Application
-metadata:
-  name: mariadb-app
-  namespace: mariadb
-spec:
-  componentKinds:
-  - group: apps.open-cluster-management.io
-    kind: Subscription
-  descriptor: {}
-  selector:
-    matchExpressions:
-    - key: app
-      operator: In
-      values:
-      - mariadb-app
+      name: aws-clusters
